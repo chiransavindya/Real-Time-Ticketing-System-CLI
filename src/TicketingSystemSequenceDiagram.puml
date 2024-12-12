@@ -1,0 +1,42 @@
+@startuml
+title Real-Time Event Ticketing System - Ticket Flow
+
+actor "Vendor Thread" as Vendor
+participant "TicketPool" as Pool
+actor "Customer Thread" as Customer
+
+== Ticket Release Process ==
+group Ticket Release
+    Vendor -> Pool : addTicket(ticket)
+    activate Pool
+    note right: Synchronized method\nChecks pool capacity
+
+    alt Ticket Added Successfully
+        Pool --> Vendor : return true
+        note right: Ticket successfully\nadded to pool
+    else Pool Full
+        Pool --> Vendor : return false
+        note right: Cannot add more\ntickets
+    end
+    deactivate Pool
+end
+
+== Ticket Purchase Process ==
+group Ticket Purchase
+    Customer -> Pool : removeTicket()
+    activate Pool
+    note right: Synchronized method\nChecks ticket availability
+
+    alt Ticket Available
+        Pool --> Customer : return ticket
+        note right: Ticket successfully\nretrieved
+    else No Tickets
+        Pool --> Customer : return null
+        note right: No tickets\navailable
+    end
+    deactivate Pool
+end
+
+== Concurrent Operations ==
+note across: Multiple Vendors can add tickets\nMultiple Customers can retrieve tickets\nConcurrent access managed by synchronization
+@enduml
